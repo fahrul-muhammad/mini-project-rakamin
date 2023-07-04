@@ -1,9 +1,20 @@
 import "./App.css";
+import { LayoutComponent, kanbanBoardComponent as KanbanBoard } from "./components";
+
+const arrayTest = [1, 2, 3, 4];
 
 function App() {
   return (
     <>
-      <h1 className="text-3xl font-bold underline">Hello world!</h1>
+      <LayoutComponent>
+        {arrayTest.map((val): any => {
+          return (
+            <>
+              <KanbanBoard />
+            </>
+          );
+        })}
+      </LayoutComponent>
     </>
   );
 }

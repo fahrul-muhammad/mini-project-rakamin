@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 const defaultTheme = require("tailwindcss/defaultTheme");
+const defaultColors = require("tailwindcss/colors");
 
 module.exports = {
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
@@ -12,6 +13,17 @@ module.exports = {
       transparent: "transparent",
       white: "#ffffff",
       black: "#000",
+      grey: "#ededed",
+      softGrey: "#c4c4c4",
+      neutral: "#fafafa",
+      turquoise: "#01959f",
+      ...defaultColors,
+    },
+    fontSize: {
+      sm: ["14px"],
+      base: ["16px"],
+      lg: ["20px"],
+      xl: ["24px"],
     },
     fontWeight: {
       hairline: 100,
