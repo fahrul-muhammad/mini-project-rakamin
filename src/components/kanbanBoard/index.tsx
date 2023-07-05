@@ -2,24 +2,32 @@ import React, { useState } from "react";
 import "./kanban.css";
 import TaskCard from "../task";
 import { IoMdClose } from "react-icons/io";
+import { postNewTask } from "../../axios/items/postTask";
 
 interface Props {
   children: React.ReactNode | React.ReactNode[];
   onPress: () => void;
   style: any;
+  title: string;
+  description: string;
+  todoId: number;
 }
 
-const KanbanBoardComponent = ({ children, onPress, style }: Props) => {
+const KanbanBoardComponent = ({ children, onPress, style, title, description, todoId }: Props) => {
   const [showModal, setShowModal] = useState<boolean>(false);
+  const [body, setBody] = useState({
+    name: "",
+    progress_percentage: 0,
+  });
 
   return (
     <div style={style} className="container flex flex-col bg-[#f7feff] border-[#77c7cd] border-2 px-[1rem] py-[1rem] rounded-md w-[400px] mr-[30px] h-max">
       <div className="container h-max w-max group-task border-[#77c7cd] border-2 rounded-md ">
-        <p className="p-3">Group Task 1</p>
+        <p className="p-3">{title}</p>
       </div>
-      <p className="pt-2 font-medium">April - June</p>
+      <p className="pt-2 font-medium">{description}</p>
       {children}
-      <div className="flex flex-row items-center hover:cursor-pointer w-max" onClick={onPress} /* onClick={() => setShowModal(true)} */>
+      <div className="flex flex-row items-center hover:cursor-pointer w-max" onClick={() => setShowModal(true)}>
         <div className=" bg-white rounded-[50%] border-2 h-[20px] w-[20px] flex justify-center border-blueGray-950 items-center mt-3">
           <p className="mb-0.5">+</p>
         </div>
@@ -45,9 +53,29 @@ const KanbanBoardComponent = ({ children, onPress, style }: Props) => {
                 {/*body*/}
                 <div className="relative flex-auto p-6">
                   <p className="mb-3">Task Name</p>
-                  <input type="text" placeholder="Type Your Task" className="relative w-full px-3 py-3 text-sm placeholder-gray-400 bg-white border border-gray-600 rounded outline-none text-slate-500 focus:outline-none focus:ring" />
+                  <input
+                    onChange={(e: any) =>
+                      setBody({
+                        ...body,
+                        name: e.target.value,
+                      })
+                    }
+                    type="text"
+                    placeholder="Type Your Task"
+                    className="relative w-full px-3 py-3 text-sm placeholder-gray-400 bg-white border border-gray-600 rounded outline-none text-slate-500 focus:outline-none focus:ring"
+                  />
                   <p className="mt-3 mb-3">Progress</p>
-                  <input type="text" placeholder="70%" className="relative w-[50%] px-3 py-3 text-sm bg-white border rounded outline-none placeholder-gray-400 text-slate-600 border-gray-500 focus:outline-none focus:ring" />
+                  <input
+                    onChange={(e: any) =>
+                      setBody({
+                        ...body,
+                        progress_percentage: e.target.value,
+                      })
+                    }
+                    type="number"
+                    placeholder="70%"
+                    className="relative w-[50%] px-3 py-3 text-sm bg-white border rounded outline-none placeholder-gray-400 text-slate-600 border-gray-500 focus:outline-none focus:ring"
+                  />
                 </div>
                 {/*footer*/}
                 <div className="flex items-center justify-end p-6 border-t border-solid rounded-b border-slate-200">
@@ -61,7 +89,10 @@ const KanbanBoardComponent = ({ children, onPress, style }: Props) => {
                   <button
                     className="px-6 py-3 mb-1 mr-1 text-sm font-bold text-white uppercase transition-all duration-150 ease-linear rounded shadow outline-none bg-turquoise active:bg-turquoise hover:shadow-lg focus:outline-none"
                     type="button"
-                    onClick={() => setShowModal(false)}
+                    onClick={async () => {
+                      await postNewTask(todoId, body.name, body.progress_percentage);
+                      setShowModal(false);
+                    }}
                   >
                     Save Changes
                   </button>

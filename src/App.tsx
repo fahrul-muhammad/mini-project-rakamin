@@ -1,6 +1,9 @@
 import { TaskCard, kanbanBoardComponent as KanbanCard, LayoutComponent as Layout } from "./components";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { getDataTodos } from "./axios/todos/getTodos";
+import { getTaskItems } from "./axios/items/getTasks";
+import { deleteTask } from "./axios/items/deleteItems";
 
 // fake data generator
 const getItems = (count: any, offset = 0) =>
@@ -54,7 +57,32 @@ const getListStyle = (isDraggingOver: any) => ({
 });
 
 function App() {
-  const [state, setState] = useState([getItems(5), getItems(2, 10)]);
+  // const [board, setBoard] = useState([getItems(10), getItems(5, 10)]);
+  const [board, setBoard] = useState<any>([]);
+
+  const getData = async () => {
+    try {
+      const temp: any = [];
+      const todos = await getDataTodos();
+      if (Array.isArray(todos) && todos.length) {
+        for await (const todo of todos) {
+          await getTaskItems(todo.id).then((task) => {
+            temp.push({
+              ...todo,
+              task,
+            });
+          });
+        }
+        setBoard(temp);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    getData();
+  }, []);
 
   function onDragEnd(result: any) {
     const { source, destination } = result;
@@ -66,57 +94,77 @@ function App() {
     const sInd = +source.droppableId;
     const dInd = +destination.droppableId;
 
-    console.log("DESTINATION : ", dInd);
-
     if (sInd === dInd) {
-      const items = reorder(state[sInd], source.index, destination.index);
-      const newState: any = [...state];
+      const items = reorder(board[sInd], source.index, destination.index);
+      const newState: any = [...board];
       newState[sInd] = items;
-      setState(newState);
+      setBoard(newState);
     } else {
-      const result = move(state[sInd], state[dInd], source, destination);
-      const newState = [...state];
+      const result = move(board[sInd], board[dInd], source, destination);
+      const newState = [...board];
       newState[sInd] = result[sInd];
       newState[dInd] = result[dInd];
 
-      setState(newState.filter((group) => group.length));
+      setBoard(newState.filter((group) => group.length));
     }
   }
+
+  console.log("BOARD : ", board);
 
   return (
     <Layout
       onPress={() => {
-        setState([...state, []]);
+        setBoard([...board, []]);
       }}
     >
       <div style={{ display: "flex" }}>
         <DragDropContext onDragEnd={onDragEnd}>
-          {state.map((el, ind) => (
-            <Droppable key={ind} droppableId={`${ind}`}>
-              {(provided, snapshot) => (
-                <div ref={provided.innerRef} {...provided.droppableProps}>
-                  <KanbanCard
-                    style={getListStyle(snapshot.isDraggingOver)}
-                    {...provided.droppableProps}
-                    onPress={() => {
-                      setState([...state, getItems(1)]);
-                    }}
-                  >
-                    {el.map((item, index) => (
-                      <Draggable key={item.id} draggableId={item.id} index={index}>
-                        {(provided, snapshot) => (
-                          <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
-                            <TaskCard />
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
-                  </KanbanCard>
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-          ))}
+          {board.map((val: any, ind: number) => {
+            return (
+              <Droppable key={ind} droppableId={val.id}>
+                {(provided, snapshot) => (
+                  <div ref={provided.innerRef} {...provided.droppableProps}>
+                    <KanbanCard
+                      todoId={val.id}
+                      style={getListStyle(snapshot.isDraggingOver)}
+                      {...provided.droppableProps}
+                      onPress={() => {
+                        setBoard([...board, getItems(1)]);
+                      }}
+                      title={val?.title}
+                      description={val?.description}
+                    >
+                      {val?.task?.lengt <= 0
+                        ? null
+                        : val?.task?.map((item: any, index: any) => (
+                            <Draggable key={item.id} draggableId={item.id} index={index}>
+                              {(provided, snapshot) => (
+                                <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
+                                  <TaskCard
+                                    onDelete={async () => {
+                                      await deleteTask(item.id, val.id);
+                                    }}
+                                    taskId={item.id}
+                                    name={item.name}
+                                    progress={item.progress_percentage}
+                                    todoId={val.id}
+                                    onEdit={() => {}}
+                                    onMove={() => {}}
+                                    title={item.name}
+                                    progress_percentage={item.progress_percentage}
+                                    style={null}
+                                  />
+                                </div>
+                              )}
+                            </Draggable>
+                          ))}
+                    </KanbanCard>
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            );
+          })}
         </DragDropContext>
       </div>
     </Layout>
