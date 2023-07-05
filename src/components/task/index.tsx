@@ -2,11 +2,11 @@ import React, { useState } from "react";
 import "./task.css";
 import { FaArrowRight, FaEdit, FaTrash } from "react-icons/fa";
 
-const TaskCard = () => {
+const TaskCard = ({ style }: any) => {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(true);
   return (
     <>
-      <div className="container w-full border-[#e6e7e8] border-2 rounded-md bg-white h-max p-4 hover:cursor-grab active:cursor-grabbing mb-3">
+      <div style={style} className="container w-full border-[#e6e7e8] border-2 rounded-md bg-white h-max p-4 hover:cursor-grab active:cursor-grabbing mb-3">
         <p className="title xl:text-base lg:text-base">Re-designed the zero-g doggie bags. No more spills!</p>
         <hr className="my-2 dash" />
         <div className="container flex flex-row items-center justify-between w-full">
