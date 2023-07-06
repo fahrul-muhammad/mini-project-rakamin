@@ -3,6 +3,7 @@ import "./task.css";
 import { FaArrowRight, FaArrowLeft, FaEdit, FaTrash } from "react-icons/fa";
 import { IoMdClose } from "react-icons/io";
 import { editTask } from "../../axios/items/editTask";
+import { AiFillCheckCircle } from "react-icons/ai";
 
 interface Props {
   title: string;
@@ -11,16 +12,19 @@ interface Props {
   progress_percentage: number;
   onDelete: () => void;
   onEdit: () => void;
-  onMoveRight: (boardIdx: number, taskId: any) => void;
-  onMoveLeft: (boardIdx: number, taskId: any) => void;
+  onMoveRight: (boardIdx: number, taskId: any, taskIdx: any) => void;
+  onMoveLeft: (boardIdx: number, taskId: any, taskIdx: any) => void;
   setLoading: (status: boolean) => void;
   todoId: number;
   name: string;
   progress: number;
   taskId: number;
+  taskIdx: number;
+  isFirstIndex: boolean;
+  isLastIndex: any;
 }
 
-const TaskCard = ({ boardIndex, style, title, progress_percentage, onDelete, onMoveRight, todoId, name, progress, taskId, setLoading, onMoveLeft }: Props) => {
+const TaskCard = ({ taskIdx, isFirstIndex, isLastIndex, boardIndex, style, title, progress_percentage, onDelete, onMoveRight, todoId, name, progress, taskId, setLoading, onMoveLeft }: Props) => {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(true);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [body, setBody] = useState({
@@ -37,41 +41,72 @@ const TaskCard = ({ boardIndex, style, title, progress_percentage, onDelete, onM
         <div className="container flex flex-row items-center justify-between w-full">
           <div className="w-[75%] bg-grey rounded-full h-3 ">
             <div
-              className="h-3 rounded-full bg-turquoise"
+              className={`h-3 rounded-full ${progress_percentage < 100 ? "bg-turquoise " : "bg-[#43936c]"}`}
               style={{
                 width: `${progress_percentage}%`,
               }}
             ></div>
           </div>
-          <p>{progress_percentage}%</p>
+          {progress_percentage < 100 ? <p>{progress_percentage}%</p> : <AiFillCheckCircle className="text-[#43936c] text-xl" />}
+
           <div onClick={() => setIsMenuOpen(!isMenuOpen)} className="w-[25px] h-[25px] hover:bg-grey flex items-center flex-row justify-center rounded-md">
             <p className="mb-2.5 text-xl hover:cursor-pointer text-center text-[#757575]">...</p>
             {/* OPEN MENU 3 DOTS OR OPTIONS */}
             <div className="relative">
               <div hidden={isMenuOpen} className="absolute z-10 w-56 mt-2 bg-white border border-gray-100 divide-y divide-gray-100 rounded-md shadow-lg end-0 top-2" role="menu">
                 <div className="p-2">
-                  <button
-                    className="flex flex-row items-center"
-                    onClick={() => {
-                      onMoveRight(boardIndex, taskId);
-                    }}
-                  >
-                    <FaArrowRight className="text-sm text-gray-800" />
-                    <p className="block px-2 py-2 text-sm text-gray-800 rounded-lg hover:bg-gray-50 hover:text-gray-1000" role="menuitem">
-                      Move Right
-                    </p>
-                  </button>
-                  <button
-                    className="flex flex-row items-center"
-                    onClick={() => {
-                      onMoveLeft(boardIndex, taskId);
-                    }}
-                  >
-                    <FaArrowLeft className="text-sm text-gray-800" />
-                    <p className="block px-2 py-2 text-sm text-gray-800 rounded-lg hover:bg-gray-50 hover:text-gray-1000" role="menuitem">
-                      Move Left
-                    </p>
-                  </button>
+                  {!isLastIndex && (
+                    <button
+                      className="flex flex-row items-center"
+                      onClick={() => {
+                        onMoveRight(boardIndex, taskId, taskIdx);
+                      }}
+                    >
+                      <FaArrowRight className="text-sm text-gray-800" />
+                      <p className="block px-2 py-2 text-sm text-gray-800 rounded-lg hover:bg-gray-50 hover:text-gray-1000" role="menuitem">
+                        Move Right
+                      </p>
+                    </button>
+                  )}
+                  {isFirstIndex && isLastIndex && (
+                    <>
+                      <button
+                        className="flex flex-row items-center"
+                        onClick={() => {
+                          onMoveRight(boardIndex, taskId, taskIdx);
+                        }}
+                      >
+                        <FaArrowRight className="text-sm text-gray-800" />
+                        <p className="block px-2 py-2 text-sm text-gray-800 rounded-lg hover:bg-gray-50 hover:text-gray-1000" role="menuitem">
+                          Move Right
+                        </p>
+                      </button>
+                      <button
+                        className="flex flex-row items-center"
+                        onClick={() => {
+                          onMoveLeft(boardIndex, taskId, taskIdx);
+                        }}
+                      >
+                        <FaArrowLeft className="text-sm text-gray-800" />
+                        <p className="block px-2 py-2 text-sm text-gray-800 rounded-lg hover:bg-gray-50 hover:text-gray-1000" role="menuitem">
+                          Move Left
+                        </p>
+                      </button>
+                    </>
+                  )}
+                  {!isFirstIndex && (
+                    <button
+                      className="flex flex-row items-center"
+                      onClick={() => {
+                        onMoveLeft(boardIndex, taskId, taskIdx);
+                      }}
+                    >
+                      <FaArrowLeft className="text-sm text-gray-800" />
+                      <p className="block px-2 py-2 text-sm text-gray-800 rounded-lg hover:bg-gray-50 hover:text-gray-1000" role="menuitem">
+                        Move Left
+                      </p>
+                    </button>
+                  )}
 
                   <button className="flex flex-row items-center" onClick={() => setShowModal(true)}>
                     <FaEdit className="text-sm text-gray-800" />
@@ -129,10 +164,10 @@ const TaskCard = ({ boardIndex, style, title, progress_percentage, onDelete, onM
                     onChange={(e: any) =>
                       setBody({
                         ...body,
-                        progress_percentage: e.target.value.parseInt(),
+                        progress_percentage: Number(e.target.value),
                       })
                     }
-                    type="number"
+                    type="text"
                     value={body.progress_percentage}
                     placeholder="70%"
                     className="relative w-[50%] px-3 py-3 text-sm bg-white border rounded outline-none placeholder-gray-400 text-slate-800  placeholder:text-slate-600  border-gray-500 focus:outline-none focus:ring"

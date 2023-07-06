@@ -14,21 +14,58 @@ interface Props {
   ref: any;
   taskLength: number;
   setLoading: (status: boolean) => void;
+  colorId: number;
 }
 
-const KanbanBoardComponent = ({ setLoading, taskLength, children, onPress, style, title, description, todoId, ref }: Props) => {
+const KanbanBoardComponent = ({ colorId, setLoading, taskLength, children, onPress, style, title, description, todoId, ref }: Props) => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [body, setBody] = useState({
     name: "",
     progress_percentage: 0,
   });
 
-  console.log("TASK LENGTH", taskLength);
+  const colorTempt = [
+    {
+      bg: "#f7feff",
+      bd: "#2da7af",
+    },
+    {
+      bg: "#fffcf3",
+      bd: "#feeec7",
+    },
+    {
+      bg: "#fffafa",
+      bd: "#f7bec3",
+    },
+    {
+      bg: "#f8fbf9",
+      bd: "#c4e1d3",
+    },
+  ];
 
   return (
-    <div ref={ref} style={style} className="container flex flex-col bg-[#f7feff] border-[#77c7cd] border-2 px-[1rem] py-[1rem] rounded-md w-[400px] mr-[30px] h-max">
-      <div className="container h-max w-max group-task border-[#77c7cd] border-2 rounded-md ">
-        <p className="p-3">{title}</p>
+    <div
+      ref={ref}
+      style={{
+        borderColor: colorTempt[colorId].bd,
+        backgroundColor: colorTempt[colorId].bg,
+      }}
+      className={`container flex flex-col   border-2 px-[1rem] py-[1rem] rounded-md w-[400px] mr-[30px] h-max`}
+    >
+      <div
+        className={`container h-max w-max group-task  border-2 rounded-md `}
+        style={{
+          borderColor: colorTempt[colorId].bd,
+        }}
+      >
+        <p
+          className={`p-3 font-medium `}
+          style={{
+            color: "#656665",
+          }}
+        >
+          {title}
+        </p>
       </div>
       <p className="pt-2 font-medium">{description}</p>
       {taskLength == 0 && (

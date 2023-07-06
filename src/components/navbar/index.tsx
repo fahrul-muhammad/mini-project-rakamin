@@ -67,16 +67,16 @@ const NavbarComponent = ({ setLoading }: Props) => {
                   />
                 </div>
                 {/*footer*/}
-                <div className="flex items-center justify-end p-6 border-t border-solid rounded-b border-slate-200">
+                <div className="flex items-center justify-end px-6 py-3 border-t border-solid rounded-b border-slate-200">
                   <button
-                    className="px-6 py-3 mb-1 mr-2 text-sm font-bold text-gray-700 uppercase transition-all duration-150 ease-linear bg-white border-2 border-gray-700 rounded shadow outline-none hover:shadow-lg focus:outline-none"
+                    className="px-6 py-3 mb-1 mr-2 text-sm font-bold text-gray-700 uppercase transition-all duration-150 ease-linear bg-white border-2 border-gray-700 rounded shadow outline-none h-[4.5vh] hover:shadow-lg focus:outline-none"
                     type="button"
                     // onClick={() => setShowModal(false)}
                   >
                     Cancel
                   </button>
                   <button
-                    className="px-6 py-3 mb-1 mr-1 text-sm font-bold text-white uppercase transition-all duration-150 ease-linear rounded shadow outline-none bg-turquoise active:bg-turquoise hover:shadow-lg focus:outline-none"
+                    className="w-[8vw] h-[4.5vh] px-6 py-3 mb-1 mr-1 text-sm font-bold text-white uppercase transition-all duration-150 ease-linear rounded shadow outline-none bg-turquoise active:bg-turquoise hover:shadow-lg focus:outline-none"
                     type="button"
                     onClick={async () => {
                       setLoading(true);
