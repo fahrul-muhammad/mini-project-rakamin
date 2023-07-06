@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import "./navbar.css";
 import { IoMdClose } from "react-icons/io";
 import { IoMdAdd } from "react-icons/io";
 import { postNewTodos } from "../../axios/todos/postNewTodo";
@@ -16,7 +15,7 @@ const NavbarComponent = ({ setLoading }: Props) => {
   });
   return (
     <>
-      <nav className="flex container flex-row h-[8vh] items-center ">
+      <nav className="flex container flex-row h-[8vh] items-center w-[100%] ">
         <p className="pl-10 font-extrabold brand sm:text-sm base:text-base lg:text-xl">Product Roadmap</p>
         <button onClick={() => setShowModal(true)} className="ml-5 flex flex-row items-center bg-turquoise h-[50px] p-2 rounded-md justify-center">
           <IoMdAdd className="text-lg font-bold text-white" />

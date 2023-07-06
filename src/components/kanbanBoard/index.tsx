@@ -1,6 +1,4 @@
 import React, { useState } from "react";
-import "./kanban.css";
-import TaskCard from "../task";
 import { IoMdClose } from "react-icons/io";
 import { postNewTask } from "../../axios/items/postTask";
 
@@ -50,7 +48,7 @@ const KanbanBoardComponent = ({ colorId, setLoading, taskLength, children, onPre
         borderColor: colorTempt[colorId].bd,
         backgroundColor: colorTempt[colorId].bg,
       }}
-      className={`container flex flex-col   border-2 px-[1rem] py-[1rem] rounded-md w-[400px] mr-[30px] h-max`}
+      className={`container flex flex-col my-5 pc:mx-5 laptop:mx-4  border-2 px-[1rem] py-[1rem] rounded-md laptop:w-[400px] pc:w-[400px] mobile:mr-0 mr-[30px] h-max`}
     >
       <div
         className={`container h-max w-max group-task  border-2 rounded-md `}

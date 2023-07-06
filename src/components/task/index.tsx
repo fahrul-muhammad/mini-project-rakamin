@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import "./task.css";
 import { FaArrowRight, FaArrowLeft, FaEdit, FaTrash } from "react-icons/fa";
 import { IoMdClose } from "react-icons/io";
 import { editTask } from "../../axios/items/editTask";

@@ -186,7 +186,7 @@ function App() {
         setIsLoading(value);
       }}
     >
-      <div style={{ display: "flex" }}>
+      <div className="flex w-screen  pc:flex-row laptop:flex-row tablet:flex-row mobile:flex-col">
         <DragDropContext
           onDragEnd={(e) => {
             onDragEnd(e);
