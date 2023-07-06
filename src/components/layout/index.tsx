@@ -5,13 +5,13 @@ import KanbanBoard from "../kanbanBoard";
 
 interface Props {
   children: React.ReactNode | React.ReactNode[];
-  onPress: () => void;
+  setLoading: (value: boolean) => void;
 }
 
-const LayoutComponent = ({ children, onPress }: Props) => {
+const LayoutComponent = ({ children, setLoading }: Props) => {
   return (
     <>
-      <NavbarComponent onPress={onPress} />
+      <NavbarComponent setLoading={setLoading} />
       <div>
         <div className="flex  min-w-fit flex-row min-h-[90vh] py-[1.5rem] border-t-2 px-[2.5rem] border-t-softGrey">{children}</div>
       </div>

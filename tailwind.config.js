@@ -17,6 +17,7 @@ module.exports = {
       softGrey: "#c4c4c4",
       neutral: "#fafafa",
       turquoise: "#01959f",
+      darkGrey: "#b7b7b7",
       ...defaultColors,
     },
     fontSize: {

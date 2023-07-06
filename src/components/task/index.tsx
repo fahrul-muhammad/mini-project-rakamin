@@ -1,23 +1,26 @@
 import React, { useState } from "react";
 import "./task.css";
-import { FaArrowRight, FaEdit, FaTrash } from "react-icons/fa";
+import { FaArrowRight, FaArrowLeft, FaEdit, FaTrash } from "react-icons/fa";
 import { IoMdClose } from "react-icons/io";
 import { editTask } from "../../axios/items/editTask";
 
 interface Props {
   title: string;
   style: any;
+  boardIndex: number;
   progress_percentage: number;
   onDelete: () => void;
   onEdit: () => void;
-  onMove: () => void;
+  onMoveRight: (boardIdx: number, taskId: any) => void;
+  onMoveLeft: (boardIdx: number, taskId: any) => void;
+  setLoading: (status: boolean) => void;
   todoId: number;
   name: string;
   progress: number;
   taskId: number;
 }
 
-const TaskCard = ({ style, title, progress_percentage, onDelete, onMove, todoId, name, progress, taskId }: Props) => {
+const TaskCard = ({ boardIndex, style, title, progress_percentage, onDelete, onMoveRight, todoId, name, progress, taskId, setLoading, onMoveLeft }: Props) => {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(true);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [body, setBody] = useState({
@@ -26,7 +29,6 @@ const TaskCard = ({ style, title, progress_percentage, onDelete, onMove, todoId,
     progress_percentage: progress,
   });
 
-  console.log("BODY EDIT", body);
   return (
     <>
       <div style={style} className="container w-full border-[#e6e7e8] border-2 rounded-md bg-white h-max p-4 hover:cursor-grab active:cursor-grabbing mb-3">
@@ -48,10 +50,26 @@ const TaskCard = ({ style, title, progress_percentage, onDelete, onMove, todoId,
             <div className="relative">
               <div hidden={isMenuOpen} className="absolute z-10 w-56 mt-2 bg-white border border-gray-100 divide-y divide-gray-100 rounded-md shadow-lg end-0 top-2" role="menu">
                 <div className="p-2">
-                  <button className="flex flex-row items-center" onClick={onMove}>
+                  <button
+                    className="flex flex-row items-center"
+                    onClick={() => {
+                      onMoveRight(boardIndex, taskId);
+                    }}
+                  >
                     <FaArrowRight className="text-sm text-gray-800" />
                     <p className="block px-2 py-2 text-sm text-gray-800 rounded-lg hover:bg-gray-50 hover:text-gray-1000" role="menuitem">
                       Move Right
+                    </p>
+                  </button>
+                  <button
+                    className="flex flex-row items-center"
+                    onClick={() => {
+                      onMoveLeft(boardIndex, taskId);
+                    }}
+                  >
+                    <FaArrowLeft className="text-sm text-gray-800" />
+                    <p className="block px-2 py-2 text-sm text-gray-800 rounded-lg hover:bg-gray-50 hover:text-gray-1000" role="menuitem">
+                      Move Left
                     </p>
                   </button>
 
@@ -95,15 +113,6 @@ const TaskCard = ({ style, title, progress_percentage, onDelete, onMove, todoId,
                 <div className="relative flex-auto p-6">
                   <p className="mb-3">Task Name</p>
                   <input
-                    // onChange={(e: any) =>
-                    //   setBody({
-                    //     ...body,onClick={async () => {
-                    // //   await postNewTask(todoId, body.name, body.progress_percentage);
-                    // //   setShowModal(false);
-                    // // }}
-                    //     name: e.target.value,
-                    //   })
-                    // }
                     onChange={(e: any) => {
                       setBody({
                         ...body,
@@ -113,7 +122,7 @@ const TaskCard = ({ style, title, progress_percentage, onDelete, onMove, todoId,
                     type="text"
                     value={body.name}
                     placeholder="Type Your Task"
-                    className="relative w-full px-3 py-3 text-sm placeholder-gray-400 bg-white border border-gray-600 rounded outline-none text-slate-500 focus:outline-none focus:ring"
+                    className="relative w-full px-3 py-3 text-sm placeholder-gray-400 bg-white border border-gray-600 rounded outline-none text-slate-800 placeholder:text-slate-600 focus:outline-none focus:ring"
                   />
                   <p className="mt-3 mb-3">Progress</p>
                   <input
@@ -126,7 +135,7 @@ const TaskCard = ({ style, title, progress_percentage, onDelete, onMove, todoId,
                     type="number"
                     value={body.progress_percentage}
                     placeholder="70%"
-                    className="relative w-[50%] px-3 py-3 text-sm bg-white border rounded outline-none placeholder-gray-400 text-slate-600 border-gray-500 focus:outline-none focus:ring"
+                    className="relative w-[50%] px-3 py-3 text-sm bg-white border rounded outline-none placeholder-gray-400 text-slate-800  placeholder:text-slate-600  border-gray-500 focus:outline-none focus:ring"
                   />
                 </div>
                 {/*footer*/}
@@ -142,7 +151,14 @@ const TaskCard = ({ style, title, progress_percentage, onDelete, onMove, todoId,
                     className="px-6 py-3 mb-1 mr-1 text-sm font-bold text-white uppercase transition-all duration-150 ease-linear rounded shadow outline-none bg-turquoise active:bg-turquoise hover:shadow-lg focus:outline-none"
                     type="button"
                     onClick={async () => {
-                      await editTask(body, todoId, taskId);
+                      setLoading(true);
+                      await editTask(body, todoId, taskId)
+                        .then(() => {
+                          setLoading(false);
+                        })
+                        .catch(() => {
+                          setLoading(false);
+                        });
                       setShowModal(false);
                     }}
                   >

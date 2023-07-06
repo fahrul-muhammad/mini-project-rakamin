@@ -4,6 +4,8 @@ import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { getDataTodos } from "./axios/todos/getTodos";
 import { getTaskItems } from "./axios/items/getTasks";
 import { deleteTask } from "./axios/items/deleteItems";
+import { editTask } from "./axios/items/editTask";
+import { CLIENT_RENEG_LIMIT } from "tls";
 
 // fake data generator
 const getItems = (count: any, offset = 0) =>
@@ -16,7 +18,6 @@ const reorder = (list: any, startIndex: any, endIndex: any) => {
   const result = Array.from(list);
   const [removed] = result.splice(startIndex, 1);
   result.splice(endIndex, 0, removed);
-
   return result;
 };
 
@@ -33,7 +34,6 @@ const move = (source: any, destination: any, droppableSource: any, droppableDest
   const result: any = {};
   result[droppableSource.droppableId] = sourceClone;
   result[droppableDestination.droppableId] = destClone;
-
   return result;
 };
 const grid = 8;
@@ -59,6 +59,8 @@ const getListStyle = (isDraggingOver: any) => ({
 function App() {
   // const [board, setBoard] = useState([getItems(10), getItems(5, 10)]);
   const [board, setBoard] = useState<any>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [dragContext, setDragContext] = useState<any>(null);
 
   const getData = async () => {
     try {
@@ -81,12 +83,14 @@ function App() {
   };
 
   useEffect(() => {
-    getData();
-  }, []);
+    if (!isLoading) {
+      getData();
+    }
+  }, [isLoading]);
 
   function onDragEnd(result: any) {
-    const { source, destination } = result;
-
+    const { source, destination, draggableId } = result;
+    console.log("RESULT : ", result);
     // dropped outside the list
     if (!destination) {
       return;
@@ -95,61 +99,112 @@ function App() {
     const dInd = +destination.droppableId;
 
     if (sInd === dInd) {
-      const items = reorder(board[sInd], source.index, destination.index);
+      const items = reorder(board[sInd].task, source.index, destination.index);
       const newState: any = [...board];
-      newState[sInd] = items;
+      newState[sInd].task = items;
       setBoard(newState);
     } else {
-      const result = move(board[sInd], board[dInd], source, destination);
+      const result = move(board[sInd].task, board[dInd].task, source, destination);
       const newState = [...board];
-      newState[sInd] = result[sInd];
-      newState[dInd] = result[dInd];
+      newState[sInd].task = result[sInd];
+      newState[dInd].task = result[dInd];
 
-      setBoard(newState.filter((group) => group.length));
+      const sourceBoard = newState[sInd].id;
+      const destBoard = newState[dInd].id;
+      editTask({ target_todo_id: destBoard }, sourceBoard, draggableId).catch((err) => console.log(err));
+      setBoard(newState);
     }
   }
 
-  console.log("BOARD : ", board);
+  const onMoveRightClick = (boardIndex: number, taskId: any) => {
+    const newBoard: any = [...board];
+    const sInd = boardIndex;
+    const dInd = boardIndex + 1;
+
+    setIsLoading(true);
+    editTask({ target_todo_id: newBoard[dInd].id }, newBoard[sInd].id, taskId)
+      .then(() => {
+        setIsLoading(false);
+      })
+      .catch((err) => console.log(err));
+  };
+
+  const onMoveLeftClick = (boardIndex: number, taskId: any) => {
+    const newBoard: any = [...board];
+    const sInd = boardIndex;
+    const dInd = boardIndex - 1;
+
+    setIsLoading(true);
+    editTask({ target_todo_id: newBoard[dInd].id }, newBoard[sInd].id, taskId)
+      .then(() => {
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        console.log(err);
+        setIsLoading(false);
+      });
+  };
 
   return (
     <Layout
-      onPress={() => {
-        setBoard([...board, []]);
+      setLoading={(value) => {
+        setIsLoading(value);
       }}
     >
       <div style={{ display: "flex" }}>
-        <DragDropContext onDragEnd={onDragEnd}>
-          {board.map((val: any, ind: number) => {
-            return (
-              <Droppable key={ind} droppableId={val.id}>
-                {(provided, snapshot) => (
-                  <div ref={provided.innerRef} {...provided.droppableProps}>
-                    <KanbanCard
-                      todoId={val.id}
-                      style={getListStyle(snapshot.isDraggingOver)}
-                      {...provided.droppableProps}
-                      onPress={() => {
-                        setBoard([...board, getItems(1)]);
-                      }}
-                      title={val?.title}
-                      description={val?.description}
-                    >
-                      {val?.task?.lengt <= 0
-                        ? null
-                        : val?.task?.map((item: any, index: any) => (
-                            <Draggable key={item.id} draggableId={item.id} index={index}>
+        {!isLoading ? (
+          <DragDropContext
+            onDragEnd={(e) => {
+              onDragEnd(e);
+            }}
+          >
+            {/* LOOPING BOARD DATA */}
+            {board.map((val: any, ind: number) => {
+              return (
+                <Droppable key={ind} droppableId={`${ind}`}>
+                  {(provided, snapshot) => (
+                    <div ref={provided.innerRef} {...provided.droppableProps}>
+                      <KanbanCard
+                        ref={null}
+                        taskLength={val.task.length}
+                        todoId={val.id}
+                        style={getListStyle(snapshot.isDraggingOver)}
+                        {...provided.droppableProps}
+                        onPress={() => {
+                          // setBoard([...board, getItems(1)]);
+                        }}
+                        setLoading={(status: boolean) => {
+                          setIsLoading(status);
+                        }}
+                        title={val?.title}
+                        description={val?.description}
+                      >
+                        {/* LOOPING TASK IN EVERY BOARD */}
+                        {val?.task?.lengt <= 0 ? (
+                          <p>empty Task</p>
+                        ) : (
+                          val?.task?.map((item: any, index: any) => (
+                            <Draggable key={item.id} draggableId={item.id.toString()} index={index}>
                               {(provided, snapshot) => (
                                 <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
                                   <TaskCard
                                     onDelete={async () => {
-                                      await deleteTask(item.id, val.id);
+                                      setIsLoading(true);
+                                      await deleteTask(item.id, val.id).then(() => {
+                                        setIsLoading(false);
+                                      });
                                     }}
+                                    setLoading={(status: boolean) => {
+                                      setIsLoading(status);
+                                    }}
+                                    boardIndex={ind}
                                     taskId={item.id}
                                     name={item.name}
                                     progress={item.progress_percentage}
                                     todoId={val.id}
                                     onEdit={() => {}}
-                                    onMove={() => {}}
+                                    onMoveRight={onMoveRightClick}
+                                    onMoveLeft={onMoveLeftClick}
                                     title={item.name}
                                     progress_percentage={item.progress_percentage}
                                     style={null}
@@ -157,15 +212,19 @@ function App() {
                                 </div>
                               )}
                             </Draggable>
-                          ))}
-                    </KanbanCard>
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
-            );
-          })}
-        </DragDropContext>
+                          ))
+                        )}
+                      </KanbanCard>
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
+              );
+            })}
+          </DragDropContext>
+        ) : (
+          <p>Loading</p>
+        )}
       </div>
     </Layout>
   );

@@ -11,21 +11,33 @@ interface Props {
   title: string;
   description: string;
   todoId: number;
+  ref: any;
+  taskLength: number;
+  setLoading: (status: boolean) => void;
 }
 
-const KanbanBoardComponent = ({ children, onPress, style, title, description, todoId }: Props) => {
+const KanbanBoardComponent = ({ setLoading, taskLength, children, onPress, style, title, description, todoId, ref }: Props) => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [body, setBody] = useState({
     name: "",
     progress_percentage: 0,
   });
 
+  console.log("TASK LENGTH", taskLength);
+
   return (
-    <div style={style} className="container flex flex-col bg-[#f7feff] border-[#77c7cd] border-2 px-[1rem] py-[1rem] rounded-md w-[400px] mr-[30px] h-max">
+    <div ref={ref} style={style} className="container flex flex-col bg-[#f7feff] border-[#77c7cd] border-2 px-[1rem] py-[1rem] rounded-md w-[400px] mr-[30px] h-max">
       <div className="container h-max w-max group-task border-[#77c7cd] border-2 rounded-md ">
         <p className="p-3">{title}</p>
       </div>
       <p className="pt-2 font-medium">{description}</p>
+      {taskLength == 0 && (
+        <>
+          <div className="flex my-2 items-center w-full h-[5vh] bg-neutral-50 rounded-md  border-2 border-[#e6e6e6]">
+            <p className="pl-3 text-darkGrey">No Task</p>
+          </div>
+        </>
+      )}
       {children}
       <div className="flex flex-row items-center hover:cursor-pointer w-max" onClick={() => setShowModal(true)}>
         <div className=" bg-white rounded-[50%] border-2 h-[20px] w-[20px] flex justify-center border-blueGray-950 items-center mt-3">
@@ -62,7 +74,7 @@ const KanbanBoardComponent = ({ children, onPress, style, title, description, to
                     }
                     type="text"
                     placeholder="Type Your Task"
-                    className="relative w-full px-3 py-3 text-sm placeholder-gray-400 bg-white border border-gray-600 rounded outline-none text-slate-500 focus:outline-none focus:ring"
+                    className="relative w-full px-3 py-3 text-sm placeholder-gray-400 bg-white border border-gray-600 rounded outline-none text-slate-800 focus:outline-none focus:ring placeholder:text-slate-600"
                   />
                   <p className="mt-3 mb-3">Progress</p>
                   <input
@@ -74,7 +86,7 @@ const KanbanBoardComponent = ({ children, onPress, style, title, description, to
                     }
                     type="number"
                     placeholder="70%"
-                    className="relative w-[50%] px-3 py-3 text-sm bg-white border rounded outline-none placeholder-gray-400 text-slate-600 border-gray-500 focus:outline-none focus:ring"
+                    className="relative w-[50%] px-3 py-3 text-sm bg-white border rounded outline-none placeholder-gray-400 text-slate-800  placeholder:text-slate-600 border-gray-500 focus:outline-none focus:ring"
                   />
                 </div>
                 {/*footer*/}
@@ -90,7 +102,14 @@ const KanbanBoardComponent = ({ children, onPress, style, title, description, to
                     className="px-6 py-3 mb-1 mr-1 text-sm font-bold text-white uppercase transition-all duration-150 ease-linear rounded shadow outline-none bg-turquoise active:bg-turquoise hover:shadow-lg focus:outline-none"
                     type="button"
                     onClick={async () => {
-                      await postNewTask(todoId, body.name, body.progress_percentage);
+                      setLoading(true);
+                      await postNewTask(todoId, body.name, body.progress_percentage)
+                        .then(() => {
+                          setLoading(false);
+                        })
+                        .catch(() => {
+                          setLoading(false);
+                        });
                       setShowModal(false);
                     }}
                   >

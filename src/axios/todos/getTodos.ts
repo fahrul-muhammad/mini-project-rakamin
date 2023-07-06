@@ -7,7 +7,10 @@ export const getDataTodos = async () => {
         Authorization: "Bearer " + "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo5LCJleHAiOjE2OTcxOTQ2NTR9.zRvVu5AlCxpInd5c-f6BDSVbRvxBztkXeynKZc_w0ZU",
       },
     });
-    return response.data.slice(0, 4);
+    const data = [...response.data.slice(0, 3)];
+    // const return
+    data.push(response.data[response.data.length - 1]);
+    return data;
   } catch (error) {
     console.error(error);
   }
