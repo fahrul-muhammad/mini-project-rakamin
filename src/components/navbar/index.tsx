@@ -1,13 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { IoMdClose } from "react-icons/io";
 import { IoMdAdd } from "react-icons/io";
 import { postNewTodos } from "../../axios/todos/postNewTodo";
+import authContext from "../../authContext";
 
 interface Props {
   setLoading: (status: boolean) => void;
 }
 
 const NavbarComponent = ({ setLoading }: Props) => {
+  const { authToken } = useContext(authContext);
+  const storageToken = localStorage.getItem("token") as string;
+  const tokenss = JSON.parse(storageToken) || authToken;
+
   const [showModal, setShowModal] = useState<boolean>(false);
   const [body, setBody] = useState({
     title: "",
@@ -79,7 +84,7 @@ const NavbarComponent = ({ setLoading }: Props) => {
                     type="button"
                     onClick={async () => {
                       setLoading(true);
-                      await postNewTodos(body)
+                      await postNewTodos(body, tokenss)
                         .then(() => {
                           setLoading(false);
                         })
