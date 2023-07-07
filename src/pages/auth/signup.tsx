@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import Logo from "../../assets/logo.png";
 import { Register } from "../../axios/user/signup";
 import { useNavigate } from "react-router-dom";
+import authContext from "../../authContext";
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -13,15 +14,16 @@ const SignUp = () => {
   });
   const [isError, setIsError] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string>("");
+  const { setAuthToken, setAuthenticated } = useContext(authContext);
 
   const handleRegister = async () => {
     const result: any = await Register(body);
-    console.log("REGIST : ", result);
     if (result.status === 201) {
-      // localStorage.setItem("token", result.data.auth_token);
-      return navigate("/login", {
-        state: body,
-      });
+      const token = JSON.stringify(result.data.auth_token);
+      localStorage.setItem("token", token);
+      setAuthToken(token);
+      setAuthenticated(true);
+      navigate("/home");
     } else {
       setErrorMsg("Register Error, Coba lagi");
       return setIsError(true);

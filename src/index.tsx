@@ -1,17 +1,29 @@
-import React from "react";
+import React, { useState } from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 import reportWebVitals from "./reportWebVitals";
 import { PageRouter } from "./router";
+import authContext from "./authContext";
 
 if (window.location.pathname === "/") {
   window.location.assign("/v1/login");
 }
 
+const App = () => {
+  const [authenticated, setAuthenticated] = useState(false);
+  const [authToken, setAuthToken] = useState("");
+
+  return (
+    <authContext.Provider value={{ authenticated, setAuthenticated, authToken, setAuthToken }}>
+      <PageRouter />
+    </authContext.Provider>
+  );
+};
+
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
 root.render(
   <React.StrictMode>
-    <PageRouter />
+    <App />
   </React.StrictMode>
 );
 

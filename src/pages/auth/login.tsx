@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import Logo from "../../assets/logo.png";
 import { signIn } from "../../axios/user/signin";
 import { useNavigate, useLocation } from "react-router-dom";
+import authContext from "../../authContext";
 
 const Login = () => {
   const location = useLocation();
@@ -13,13 +14,21 @@ const Login = () => {
   const [errorMsg, setErrorMsg] = useState<string>("");
   const navigate = useNavigate();
 
-  console.log("location : ", location.state);
+  const { setAuthenticated, setAuthToken, authenticated } = useContext(authContext);
+
+  useEffect(() => {
+    if (authenticated) {
+      navigate("/home");
+    }
+  }, [authenticated]);
 
   const handleLogin = async () => {
     const result = await signIn(body);
     if (result.status === 200) {
-      localStorage.setItem("token", result.data.auth_token);
-      return navigate("/home");
+      const token = JSON.stringify(result.data.auth_token);
+      localStorage.setItem("token", token);
+      setAuthToken(token);
+      setAuthenticated(true);
     } else {
       setErrorMsg("Email atau password salah");
       return setIsError(true);

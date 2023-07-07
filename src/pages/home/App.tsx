@@ -1,13 +1,14 @@
 import { TaskCard, kanbanBoardComponent as KanbanCard, LayoutComponent as Layout } from "../../components";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { getDataTodos } from "../../axios/todos/getTodos";
 import { getTaskItems } from "../../axios/items/getTasks";
 import { deleteTask } from "../../axios/items/deleteItems";
 import { editTask } from "../../axios/items/editTask";
 import { useNavigate } from "react-router-dom";
+import authContext from "../../authContext";
 
-const token = localStorage.getItem("token");
+// const token = localStorage.getItem("token");
 
 // fake data generator
 const getItems = (count: any, offset = 0) =>
@@ -59,6 +60,10 @@ const getListStyle = (isDraggingOver: any) => ({
 });
 
 function Home() {
+  const { authToken } = useContext(authContext);
+  const storageToken = localStorage.getItem("token") as string;
+  const tokenss = JSON.parse(storageToken) || authToken;
+
   const navigate = useNavigate();
   const [board, setBoard] = useState<any>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -66,10 +71,10 @@ function Home() {
   const getData = async () => {
     try {
       const temp: any = [];
-      const todos = await getDataTodos();
+      const todos = await getDataTodos(tokenss);
       if (Array.isArray(todos) && todos.length) {
         for await (const todo of todos) {
-          await getTaskItems(todo.id).then((task) => {
+          await getTaskItems(todo.id, tokenss).then((task) => {
             temp.push({
               ...todo,
               task,
@@ -83,25 +88,17 @@ function Home() {
     }
   };
 
-  // useEffect(() => {
-  //   if (token === null) {
-  //     return navigate("/login");
-  //   }
-  // }, []);
+  useEffect(() => {
+    if (!tokenss) {
+      return navigate("/login");
+    }
+  }, []);
 
   useEffect(() => {
-    if (!isLoading) {
+    if (!isLoading && tokenss) {
       getData();
     }
   }, [isLoading]);
-
-  useEffect(() => {
-    if (token !== null) {
-      getData();
-    }
-  }, [localStorage.getItem("token")]);
-
-  console.log("TOKEN FROM HOME : ", token);
 
   function onDragEnd(result: any) {
     const { source, destination, draggableId } = result;
