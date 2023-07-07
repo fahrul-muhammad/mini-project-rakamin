@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { FaArrowRight, FaArrowLeft, FaEdit, FaTrash } from "react-icons/fa";
 import { IoMdClose } from "react-icons/io";
-import { editTask } from "../../axios/items/editTask";
+import items from "../../axios/items";
 import { AiFillCheckCircle } from "react-icons/ai";
+import authContext from "../../authContext";
 
 interface Props {
   title: string;
@@ -24,6 +25,11 @@ interface Props {
 }
 
 const TaskCard = ({ taskIdx, isFirstIndex, isLastIndex, boardIndex, style, title, progress_percentage, onDelete, onMoveRight, todoId, name, progress, taskId, setLoading, onMoveLeft }: Props) => {
+  const { authToken } = useContext(authContext);
+  const storageToken = localStorage.getItem("token") as string;
+  const tokenss = JSON.parse(storageToken) || authToken;
+
+  const apiItems = items(tokenss);
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(true);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [body, setBody] = useState({
@@ -186,7 +192,8 @@ const TaskCard = ({ taskIdx, isFirstIndex, isLastIndex, boardIndex, style, title
                     type="button"
                     onClick={async () => {
                       setLoading(true);
-                      await editTask(body, todoId, taskId)
+                      await apiItems
+                        .patchTask(body, todoId, taskId)
                         .then(() => {
                           setLoading(false);
                         })

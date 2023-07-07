@@ -9,10 +9,12 @@ export const getDataTodos = async (token: any) => {
         Authorization: "Bearer " + token,
       },
     });
-    const data = [...response.data.slice(0, 3)];
-    console.log("RESOPNSE GET DATA : ", response);
-    // const return
-    data.push(response.data[response.data.length - 1]);
+
+    let data = response.data;
+    if (response.data.length >= 4) {
+      data = [...response.data.slice(0, 3)];
+      data.push(response.data[response.data.length - 1]);
+    }
     return data;
   } catch (error) {
     console.error(error);

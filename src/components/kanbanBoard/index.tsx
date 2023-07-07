@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { IoMdClose } from "react-icons/io";
-import { postNewTask } from "../../axios/items/postTask";
+import items from "../../axios/items";
+import authContext from "../../authContext";
 
 interface Props {
   children: React.ReactNode | React.ReactNode[];
@@ -16,6 +17,11 @@ interface Props {
 }
 
 const KanbanBoardComponent = ({ colorId, setLoading, taskLength, children, onPress, style, title, description, todoId, ref }: Props) => {
+  const { authToken } = useContext(authContext);
+  const storageToken = localStorage.getItem("token") as string;
+  const tokenss = JSON.parse(storageToken) || authToken;
+  const apiItems = items(tokenss);
+
   const [showModal, setShowModal] = useState<boolean>(false);
   const [body, setBody] = useState({
     name: "",
@@ -138,7 +144,8 @@ const KanbanBoardComponent = ({ colorId, setLoading, taskLength, children, onPre
                     type="button"
                     onClick={async () => {
                       setLoading(true);
-                      await postNewTask(todoId, body.name, body.progress_percentage)
+                      await apiItems
+                        .postTask(todoId, body.name, body.progress_percentage)
                         .then(() => {
                           setLoading(false);
                         })

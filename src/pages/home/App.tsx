@@ -2,11 +2,9 @@ import { TaskCard, kanbanBoardComponent as KanbanCard, LayoutComponent as Layout
 import React, { useState, useEffect, useContext } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { getDataTodos } from "../../axios/todos/getTodos";
-import { getTaskItems } from "../../axios/items/getTasks";
-import { deleteTask } from "../../axios/items/deleteItems";
-import { editTask } from "../../axios/items/editTask";
 import { useNavigate } from "react-router-dom";
 import authContext from "../../authContext";
+import items from "../../axios/items";
 
 // const token = localStorage.getItem("token");
 
@@ -67,6 +65,7 @@ function Home() {
   const navigate = useNavigate();
   const [board, setBoard] = useState<any>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const apiItems = items(tokenss);
 
   const getData = async () => {
     try {
@@ -74,7 +73,7 @@ function Home() {
       const todos = await getDataTodos(tokenss);
       if (Array.isArray(todos) && todos.length) {
         for await (const todo of todos) {
-          await getTaskItems(todo.id, tokenss).then((task) => {
+          await apiItems.getTask(todo.id).then((task) => {
             temp.push({
               ...todo,
               task,
@@ -122,7 +121,8 @@ function Home() {
 
       const sourceBoard = newState[sInd].id;
       const destBoard = newState[dInd].id;
-      editTask({ target_todo_id: destBoard }, sourceBoard, draggableId)
+      apiItems
+        .patchTask({ target_todo_id: destBoard }, sourceBoard, draggableId)
         .then(() => {})
         .catch((err) => {
           console.log(err);
@@ -152,7 +152,8 @@ function Home() {
 
     const sourceBoard = newState[sInd].id;
     const destBoard = newState[dInd].id;
-    editTask({ target_todo_id: destBoard }, sourceBoard, taskId)
+    apiItems
+      .patchTask({ target_todo_id: destBoard }, sourceBoard, taskId)
       .then(() => {})
       .catch((err) => {
         console.log(err);
@@ -181,7 +182,8 @@ function Home() {
 
     const sourceBoard = newState[sInd].id;
     const destBoard = newState[dInd].id;
-    editTask({ target_todo_id: destBoard }, sourceBoard, taskId)
+    apiItems
+      .patchTask({ target_todo_id: destBoard }, sourceBoard, taskId)
       .then(() => {})
       .catch((err) => {
         console.log(err);
@@ -239,7 +241,7 @@ function Home() {
                                           isLastIndex={board[board.length - 1] === val}
                                           onDelete={async () => {
                                             setIsLoading(true);
-                                            await deleteTask(item.id, val.id).then(() => {
+                                            await apiItems.deleteTask(item.id, val.id).then(() => {
                                               setIsLoading(false);
                                             });
                                           }}
