@@ -1,11 +1,13 @@
-import { TaskCard, kanbanBoardComponent as KanbanCard, LayoutComponent as Layout } from "./components";
+import { TaskCard, kanbanBoardComponent as KanbanCard, LayoutComponent as Layout } from "../../components";
 import React, { useState, useEffect } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-import { getDataTodos } from "./axios/todos/getTodos";
-import { getTaskItems } from "./axios/items/getTasks";
-import { deleteTask } from "./axios/items/deleteItems";
-import { editTask } from "./axios/items/editTask";
-import { CLIENT_RENEG_LIMIT } from "tls";
+import { getDataTodos } from "../../axios/todos/getTodos";
+import { getTaskItems } from "../../axios/items/getTasks";
+import { deleteTask } from "../../axios/items/deleteItems";
+import { editTask } from "../../axios/items/editTask";
+import { useNavigate } from "react-router-dom";
+
+const token = localStorage.getItem("token");
 
 // fake data generator
 const getItems = (count: any, offset = 0) =>
@@ -56,8 +58,8 @@ const getListStyle = (isDraggingOver: any) => ({
   minWidth: 250,
 });
 
-function App() {
-  // const [board, setBoard] = useState([getItems(10), getItems(5, 10)]);
+function Home() {
+  const navigate = useNavigate();
   const [board, setBoard] = useState<any>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -81,15 +83,28 @@ function App() {
     }
   };
 
+  // useEffect(() => {
+  //   if (token === null) {
+  //     return navigate("/login");
+  //   }
+  // }, []);
+
   useEffect(() => {
     if (!isLoading) {
       getData();
     }
   }, [isLoading]);
 
+  useEffect(() => {
+    if (token !== null) {
+      getData();
+    }
+  }, [localStorage.getItem("token")]);
+
+  console.log("TOKEN FROM HOME : ", token);
+
   function onDragEnd(result: any) {
     const { source, destination, draggableId } = result;
-    console.log("RESULT : ", result);
     // dropped outside the list
     if (!destination) {
       return;
@@ -178,91 +193,93 @@ function App() {
     setBoard(newState);
   };
 
-  console.log("BOARD : ", board);
-
   return (
     <Layout
       setLoading={(value) => {
         setIsLoading(value);
       }}
     >
-      <div className="flex w-screen  pc:flex-row laptop:flex-row tablet:flex-row mobile:flex-col">
-        <DragDropContext
-          onDragEnd={(e) => {
-            onDragEnd(e);
-          }}
-        >
-          {/* LOOPING BOARD DATA */}
-          {isLoading ? null : (
-            <>
-              {board.map((val: any, ind: number) => {
-                return (
-                  <Droppable key={ind} droppableId={`${ind}`}>
-                    {(provided, snapshot) => (
-                      <div ref={provided.innerRef} {...provided.droppableProps}>
-                        <KanbanCard
-                          ref={null}
-                          colorId={ind}
-                          taskLength={val.task.length}
-                          todoId={val.id}
-                          style={getListStyle(snapshot.isDraggingOver)}
-                          {...provided.droppableProps}
-                          onPress={() => {}}
-                          setLoading={(status: boolean) => {
-                            setIsLoading(status);
-                          }}
-                          title={val?.title}
-                          description={val?.description}
-                        >
-                          {/* LOOPING TASK IN EVERY BOARD */}
-                          {val?.task?.lengt <= 0
-                            ? null
-                            : val?.task?.map((item: any, index: any) => (
-                                <Draggable key={item.id} draggableId={item.id.toString()} index={index}>
-                                  {(provided, _) => (
-                                    <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
-                                      <TaskCard
-                                        isFirstIndex={board[0] === val}
-                                        isLastIndex={board[board.length - 1] === val}
-                                        onDelete={async () => {
-                                          setIsLoading(true);
-                                          await deleteTask(item.id, val.id).then(() => {
-                                            setIsLoading(false);
-                                          });
-                                        }}
-                                        setLoading={(status: boolean) => {
-                                          setIsLoading(status);
-                                        }}
-                                        boardIndex={ind}
-                                        taskIdx={index}
-                                        taskId={item.id}
-                                        name={item.name}
-                                        progress={item.progress_percentage}
-                                        todoId={val.id}
-                                        onEdit={() => {}}
-                                        onMoveRight={onMoveRightClick}
-                                        onMoveLeft={onMoveLeftClick}
-                                        title={item.name}
-                                        progress_percentage={item.progress_percentage}
-                                        style={null}
-                                      />
-                                    </div>
-                                  )}
-                                </Draggable>
-                              ))}
-                        </KanbanCard>
-                        {provided.placeholder}
-                      </div>
-                    )}
-                  </Droppable>
-                );
-              })}
-            </>
-          )}
-        </DragDropContext>
-      </div>
+      <DragDropContext
+        onDragEnd={(e) => {
+          onDragEnd(e);
+        }}
+      >
+        {board.length <= 0 ? (
+          <p>No Group Task</p>
+        ) : (
+          <div className="flex w-screen pc:flex-row laptop:flex-row tablet:flex-row mobile:flex-col">
+            {/* LOOPING BOARD DATA */}
+            {isLoading ? null : (
+              <>
+                {board.map((val: any, ind: number) => {
+                  return (
+                    <Droppable key={ind} droppableId={`${ind}`}>
+                      {(provided, snapshot) => (
+                        <div ref={provided.innerRef} {...provided.droppableProps}>
+                          <KanbanCard
+                            ref={null}
+                            colorId={ind}
+                            taskLength={val.task.length}
+                            todoId={val.id}
+                            style={getListStyle(snapshot.isDraggingOver)}
+                            {...provided.droppableProps}
+                            onPress={() => {}}
+                            setLoading={(status: boolean) => {
+                              setIsLoading(status);
+                            }}
+                            title={val?.title}
+                            description={val?.description}
+                          >
+                            {/* LOOPING TASK IN EVERY BOARD */}
+                            {val?.task?.lengt <= 0
+                              ? null
+                              : val?.task?.map((item: any, index: any) => (
+                                  <Draggable key={item.id} draggableId={item.id.toString()} index={index}>
+                                    {(provided, _) => (
+                                      <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
+                                        <TaskCard
+                                          isFirstIndex={board[0] === val}
+                                          isLastIndex={board[board.length - 1] === val}
+                                          onDelete={async () => {
+                                            setIsLoading(true);
+                                            await deleteTask(item.id, val.id).then(() => {
+                                              setIsLoading(false);
+                                            });
+                                          }}
+                                          setLoading={(status: boolean) => {
+                                            setIsLoading(status);
+                                          }}
+                                          boardIndex={ind}
+                                          taskIdx={index}
+                                          taskId={item.id}
+                                          name={item.name}
+                                          progress={item.progress_percentage}
+                                          todoId={val.id}
+                                          onEdit={() => {}}
+                                          onMoveRight={onMoveRightClick}
+                                          onMoveLeft={onMoveLeftClick}
+                                          title={item.name}
+                                          progress_percentage={item.progress_percentage}
+                                          style={null}
+                                        />
+                                      </div>
+                                    )}
+                                  </Draggable>
+                                ))}
+                          </KanbanCard>
+                          {provided.placeholder}
+                        </div>
+                      )}
+                    </Droppable>
+                  );
+                })}
+              </>
+            )}
+          </div>
+        )}
+      </DragDropContext>
     </Layout>
   );
 }
 
-export default App;
+export default Home;

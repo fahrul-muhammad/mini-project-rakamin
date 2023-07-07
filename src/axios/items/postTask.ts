@@ -1,4 +1,5 @@
 import axios from "axios";
+const token = localStorage.getItem("token");
 
 export const postNewTask = async (todoId: number, name: string, progress_percentage: number) => {
   try {
@@ -10,7 +11,7 @@ export const postNewTask = async (todoId: number, name: string, progress_percent
       },
       {
         headers: {
-          Authorization: "Bearer " + "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo5LCJleHAiOjE2OTcxOTQ2NTR9.zRvVu5AlCxpInd5c-f6BDSVbRvxBztkXeynKZc_w0ZU",
+          Authorization: "Bearer " + token,
         },
       }
     );
