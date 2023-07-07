@@ -14,6 +14,8 @@ const SignUp = () => {
   });
   const [isError, setIsError] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string>("");
+  const [successMsg, setSuccessMsg] = useState<string>("");
+
   const { setAuthToken, setAuthenticated } = useContext(authContext);
 
   const handleRegister = async () => {
@@ -23,7 +25,11 @@ const SignUp = () => {
       localStorage.setItem("token", token);
       setAuthToken(token);
       setAuthenticated(true);
-      navigate("/home");
+      setSuccessMsg("Register Berhasil");
+
+      setTimeout(() => {
+        return navigate("/home");
+      }, 1500);
     } else {
       setErrorMsg("Register Error, Coba lagi");
       return setIsError(true);
@@ -98,6 +104,7 @@ const SignUp = () => {
             }}
           />
         </div>
+        {!isError && successMsg.length > 0 ? <p className="mt-4 text-green-600">{successMsg}</p> : null}
         {isError && <p className="mt-4 text-red-600">{errorMsg}</p>}
         <button onClick={handleRegister} className="flex mt-5 items-center justify-center w-[90%] h-[5vh] rounded-md bg-turquoise focus:bg-teal-700">
           <p className="font-semibold text-white">Daftar</p>

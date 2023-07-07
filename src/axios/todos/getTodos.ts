@@ -1,7 +1,5 @@
 import axios from "axios";
 
-// const token = localStorage.getItem("token");
-
 export const getDataTodos = async (token: any) => {
   try {
     const response = await axios.get("https://todo-api-18-140-52-65.rakamin.com/todos", {

@@ -12,13 +12,16 @@ const Login = () => {
   });
   const [isError, setIsError] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string>("");
+  const [successMsg, setSuccessMsg] = useState<string>("");
   const navigate = useNavigate();
 
   const { setAuthenticated, setAuthToken, authenticated } = useContext(authContext);
 
   useEffect(() => {
     if (authenticated) {
-      navigate("/home");
+      setTimeout(() => {
+        return navigate("/home");
+      }, 1500);
     }
   }, [authenticated]);
 
@@ -26,6 +29,7 @@ const Login = () => {
     const result = await signIn(body);
     if (result.status === 200) {
       const token = JSON.stringify(result.data.auth_token);
+      setSuccessMsg("Berhasil Login");
       localStorage.setItem("token", token);
       setAuthToken(token);
       setAuthenticated(true);
@@ -74,6 +78,7 @@ const Login = () => {
           />
         </div>
         {isError && <p className="mt-4 text-red-600">{errorMsg}</p>}
+        {!isError && successMsg.length > 0 ? <p className="mt-4 text-green-600">{successMsg}</p> : null}
         <button onClick={handleLogin} className="mt-4 flex items-center justify-center w-[90%] h-[5vh] rounded-md bg-turquoise focus:bg-teal-700">
           <p className="font-semibold text-white">Masuk</p>
         </button>

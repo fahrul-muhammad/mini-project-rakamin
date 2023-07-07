@@ -1,19 +1,10 @@
 import { TaskCard, kanbanBoardComponent as KanbanCard, LayoutComponent as Layout } from "../../components";
-import React, { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { getDataTodos } from "../../axios/todos/getTodos";
 import { useNavigate } from "react-router-dom";
 import authContext from "../../authContext";
 import items from "../../axios/items";
-
-// const token = localStorage.getItem("token");
-
-// fake data generator
-const getItems = (count: any, offset = 0) =>
-  Array.from({ length: count }, (v, k) => k).map((k) => ({
-    id: `item-${k + offset}-${new Date().getTime()}`,
-    content: `item ${k + offset}`,
-  }));
 
 const reorder = (list: any, startIndex: any, endIndex: any) => {
   const result = Array.from(list);
@@ -22,9 +13,6 @@ const reorder = (list: any, startIndex: any, endIndex: any) => {
   return result;
 };
 
-/**
- * Moves an item from one list to another list.
- */
 const move = (source: any, destination: any, droppableSource: any, droppableDestination: any) => {
   const sourceClone = Array.from(source);
   const destClone = Array.from(destination);
@@ -37,22 +25,9 @@ const move = (source: any, destination: any, droppableSource: any, droppableDest
   result[droppableDestination.droppableId] = destClone;
   return result;
 };
+
 const grid = 8;
-
-const getItemStyle = (isDragging: any, draggableStyle: any) => ({
-  // some basic styles to make the items look a bit nicer
-  userSelect: "none",
-  padding: grid * 2,
-  margin: `0 0 ${grid}px 0`,
-
-  // change background colour if dragging
-  background: isDragging ? "lightgreen" : "grey",
-
-  // styles we need to apply on draggables
-  ...draggableStyle,
-});
 const getListStyle = (isDraggingOver: any) => ({
-  // background: isDraggingOver ? "lightblue" : "white",
   padding: grid,
   minWidth: 250,
 });
@@ -204,7 +179,9 @@ function Home() {
         }}
       >
         {board.length <= 0 ? (
-          <p>No Group Task</p>
+          <div className="flex items-center justify-center w-full ">
+            <p>No Group Task</p>
+          </div>
         ) : (
           <div className="flex w-screen pc:flex-row laptop:flex-row tablet:flex-row mobile:flex-col">
             {/* LOOPING BOARD DATA */}
@@ -237,6 +214,7 @@ function Home() {
                                     {(provided, _) => (
                                       <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
                                         <TaskCard
+                                          length={board.length}
                                           isFirstIndex={board[0] === val}
                                           isLastIndex={board[board.length - 1] === val}
                                           onDelete={async () => {

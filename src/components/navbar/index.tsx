@@ -75,7 +75,7 @@ const NavbarComponent = ({ setLoading }: Props) => {
                   <button
                     className="px-6 py-3 mb-1 mr-2 text-sm font-bold text-gray-700 uppercase transition-all duration-150 ease-linear bg-white border-2 border-gray-700 rounded shadow outline-none h-[4.5vh] hover:shadow-lg focus:outline-none"
                     type="button"
-                    // onClick={() => setShowModal(false)}
+                    onClick={() => setShowModal(false)}
                   >
                     Cancel
                   </button>

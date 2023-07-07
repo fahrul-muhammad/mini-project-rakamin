@@ -22,9 +22,10 @@ interface Props {
   taskIdx: number;
   isFirstIndex: boolean;
   isLastIndex: any;
+  length: number;
 }
 
-const TaskCard = ({ taskIdx, isFirstIndex, isLastIndex, boardIndex, style, title, progress_percentage, onDelete, onMoveRight, todoId, name, progress, taskId, setLoading, onMoveLeft }: Props) => {
+const TaskCard = ({ length, taskIdx, isFirstIndex, isLastIndex, boardIndex, style, title, progress_percentage, onDelete, onMoveRight, todoId, name, progress, taskId, setLoading, onMoveLeft }: Props) => {
   const { authToken } = useContext(authContext);
   const storageToken = localStorage.getItem("token") as string;
   const tokenss = JSON.parse(storageToken) || authToken;
@@ -38,6 +39,8 @@ const TaskCard = ({ taskIdx, isFirstIndex, isLastIndex, boardIndex, style, title
     progress_percentage: progress,
   });
 
+  const barWidth = progress_percentage >= 100 ? "100%" : `${progress_percentage}%`;
+
   return (
     <>
       <div style={style} className="container w-full border-[#e6e7e8] border-2 rounded-md bg-white h-max p-4 hover:cursor-grab active:cursor-grabbing mb-3">
@@ -48,7 +51,7 @@ const TaskCard = ({ taskIdx, isFirstIndex, isLastIndex, boardIndex, style, title
             <div
               className={`h-3 rounded-full ${progress_percentage < 100 ? "bg-turquoise " : "bg-[#43936c]"}`}
               style={{
-                width: `${progress_percentage}%`,
+                width: barWidth,
               }}
             ></div>
           </div>
@@ -62,7 +65,7 @@ const TaskCard = ({ taskIdx, isFirstIndex, isLastIndex, boardIndex, style, title
                 <div className="p-2">
                   {!isLastIndex && (
                     <button
-                      className="flex flex-row items-center"
+                      className="flex flex-row items-center w-full"
                       onClick={() => {
                         onMoveRight(boardIndex, taskId, taskIdx);
                       }}
@@ -73,10 +76,11 @@ const TaskCard = ({ taskIdx, isFirstIndex, isLastIndex, boardIndex, style, title
                       </p>
                     </button>
                   )}
-                  {isFirstIndex && isLastIndex && (
+
+                  {length > 1 && isFirstIndex && isLastIndex && (
                     <>
                       <button
-                        className="flex flex-row items-center"
+                        className="flex flex-row items-center w-full"
                         onClick={() => {
                           onMoveRight(boardIndex, taskId, taskIdx);
                         }}
@@ -87,7 +91,7 @@ const TaskCard = ({ taskIdx, isFirstIndex, isLastIndex, boardIndex, style, title
                         </p>
                       </button>
                       <button
-                        className="flex flex-row items-center"
+                        className="flex flex-row items-center w-full"
                         onClick={() => {
                           onMoveLeft(boardIndex, taskId, taskIdx);
                         }}
@@ -101,7 +105,7 @@ const TaskCard = ({ taskIdx, isFirstIndex, isLastIndex, boardIndex, style, title
                   )}
                   {!isFirstIndex && (
                     <button
-                      className="flex flex-row items-center"
+                      className="flex flex-row items-center w-full"
                       onClick={() => {
                         onMoveLeft(boardIndex, taskId, taskIdx);
                       }}
@@ -113,14 +117,14 @@ const TaskCard = ({ taskIdx, isFirstIndex, isLastIndex, boardIndex, style, title
                     </button>
                   )}
 
-                  <button className="flex flex-row items-center" onClick={() => setShowModal(true)}>
+                  <button className="flex flex-row items-center w-full " onClick={() => setShowModal(true)}>
                     <FaEdit className="text-sm text-gray-800" />
                     <p className="block px-2 py-2 text-sm text-gray-800 rounded-lg hover:bg-gray-50 hover:text-gray-1000" role="menuitem">
                       Edit
                     </p>
                   </button>
 
-                  <button className="flex flex-row items-center" onClick={onDelete}>
+                  <button className="flex flex-row items-center w-full" onClick={onDelete}>
                     <FaTrash className="text-sm text-red-600" />
                     <p className="block px-2 py-2 text-sm text-red-600 rounded-lg hover:bg-gray-50 hover:text-gray-1000" role="menuitem">
                       Delete
