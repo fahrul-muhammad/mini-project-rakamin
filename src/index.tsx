@@ -3,7 +3,7 @@ import ReactDOM from "react-dom/client";
 import "./index.css";
 import reportWebVitals from "./reportWebVitals";
 import { PageRouter } from "./router";
-import authContext from "./authContext";
+import authContext from "./context/authContext";
 
 if (window.location.pathname === "/") {
   window.location.assign("/v1/login");

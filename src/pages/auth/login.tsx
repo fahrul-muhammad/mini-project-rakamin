@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import Logo from "../../assets/logo.png";
 import { signIn } from "../../axios/user/signin";
+import authContext from "../../context/authContext";
 import { useNavigate, useLocation } from "react-router-dom";
-import authContext from "../../authContext";
 import LoadingIndicator from "../../components/loading";
 
 const Login = () => {
+  const { setAuthenticated, setAuthToken, authenticated } = useContext(authContext);
   const location = useLocation();
   const [body, setBody] = useState({
     email: location.state !== null ? location.state.email : "",
@@ -17,8 +18,6 @@ const Login = () => {
   const [successMsg, setSuccessMsg] = useState<string>("");
   const navigate = useNavigate();
 
-  const { setAuthenticated, setAuthToken, authenticated } = useContext(authContext);
-
   useEffect(() => {
     if (authenticated) {
       setTimeout(() => {
@@ -29,6 +28,7 @@ const Login = () => {
 
   const handleLogin = async () => {
     setIsLoading(true);
+    setIsError(false);
     const result = await signIn(body);
     if (result.status === 200) {
       setIsLoading(false);

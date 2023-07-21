@@ -1,8 +1,8 @@
-import React, { useState, useContext } from "react";
+import { useState, useContext } from "react";
 import Logo from "../../assets/logo.png";
 import { Register } from "../../axios/user/signup";
+import authContext from "../../context/authContext";
 import { useNavigate } from "react-router-dom";
-import authContext from "../../authContext";
 import LoadingIndicator from "../../components/loading";
 
 const SignUp = () => {
@@ -22,6 +22,7 @@ const SignUp = () => {
 
   const handleRegister = async () => {
     setIsLoading(true);
+    setIsError(false);
     const result: any = await Register(body);
     if (result.status === 201) {
       setIsLoading(false);

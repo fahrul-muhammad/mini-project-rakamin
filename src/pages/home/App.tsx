@@ -1,59 +1,33 @@
-import { TaskCard, kanbanBoardComponent as KanbanCard, LayoutComponent as Layout } from "../../components";
+import { TaskCard, kanbanBoardComponent as KanbanCard, LayoutComponent as Layout, LoadingIndicator as Loading } from "../../components";
 import { useState, useEffect, useContext } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-import { getDataTodos } from "../../axios/todos/getTodos";
+import todos from "../../axios/todos";
 import { useNavigate } from "react-router-dom";
-import authContext from "../../authContext";
+import authContext from "../../context/authContext";
 import items from "../../axios/items";
-import LoadingIndicator from "../../components/loading";
-
-const reorder = (list: any, startIndex: any, endIndex: any) => {
-  const result = Array.from(list);
-  const [removed] = result.splice(startIndex, 1);
-  result.splice(endIndex, 0, removed);
-  return result;
-};
-
-const move = (source: any, destination: any, droppableSource: any, droppableDestination: any) => {
-  const sourceClone = Array.from(source);
-  const destClone = Array.from(destination);
-  const [removed] = sourceClone.splice(droppableSource.index, 1);
-
-  destClone.splice(droppableDestination.index, 0, removed);
-
-  const result: any = {};
-  result[droppableSource.droppableId] = sourceClone;
-  result[droppableDestination.droppableId] = destClone;
-  return result;
-};
-
-const grid = 8;
-
-const getListStyle = (isDraggingOver: any) => ({
-  padding: grid,
-  minWidth: 250,
-});
+import { reorder, move, getListStyle } from "../../utils";
 
 function Home() {
+  const [board, setBoard] = useState<any>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
   const { authToken } = useContext(authContext);
   const storageToken = localStorage.getItem("token") as string;
   const token = JSON.parse(storageToken) || authToken;
-
   const navigate = useNavigate();
-  const [board, setBoard] = useState<any>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const apiItems = items(token);
+  const apiTask = items(token);
+  const apiTodos = todos(token);
 
   const getData = async () => {
     try {
       const temp: any = [];
-      const todos = await getDataTodos(token);
-      if (todos.length <= 0) {
+      const todos = await apiTodos?.getDataTodos();
+      if (todos?.length <= 0) {
         return setIsLoading(false);
       }
       if (Array.isArray(todos) && todos.length) {
         for await (const todo of todos) {
-          await apiItems.getTask(todo.id).then((task) => {
+          await apiTask.getTask(todo.id).then((task) => {
             temp.push({
               ...todo,
               task,
@@ -102,7 +76,7 @@ function Home() {
 
       const sourceBoard = newState[sInd].id;
       const destBoard = newState[dInd].id;
-      apiItems
+      apiTask
         .patchTask({ target_todo_id: destBoard }, sourceBoard, draggableId)
         .then(() => {})
         .catch((err) => {
@@ -133,7 +107,7 @@ function Home() {
 
     const sourceBoard = newState[sInd].id;
     const destBoard = newState[dInd].id;
-    apiItems
+    apiTask
       .patchTask({ target_todo_id: destBoard }, sourceBoard, taskId)
       .then(() => {})
       .catch((err) => {
@@ -163,7 +137,7 @@ function Home() {
 
     const sourceBoard = newState[sInd].id;
     const destBoard = newState[dInd].id;
-    apiItems
+    apiTask
       .patchTask({ target_todo_id: destBoard }, sourceBoard, taskId)
       .then(() => {})
       .catch((err) => {
@@ -192,19 +166,19 @@ function Home() {
         ) : (
           <div className="flex w-screen pc:flex-row laptop:flex-row tablet:flex-row mobile:flex-col tablet:flex-wrap pc:justify-normal tablet:justify-between laptop:justify-normal mobile:justify-center">
             {isLoading ? (
-              <LoadingIndicator />
+              <Loading />
             ) : (
               <>
                 {board.map((val: any, ind: number) => {
                   return (
                     <Droppable key={ind} droppableId={`${ind}`}>
-                      {(provided, snapshot) => (
+                      {(provided) => (
                         <div ref={provided.innerRef} {...provided.droppableProps}>
                           <KanbanCard
                             colorId={ind}
                             taskLength={val.task.length}
                             todoId={val.id}
-                            style={getListStyle(snapshot.isDraggingOver)}
+                            style={getListStyle()}
                             {...provided.droppableProps}
                             setLoading={(status: boolean) => {
                               setIsLoading(status);
@@ -224,7 +198,7 @@ function Home() {
                                           isLastIndex={board[board.length - 1] === val}
                                           onDelete={async () => {
                                             setIsLoading(true);
-                                            await apiItems.deleteTask(item.id, val.id).then(() => {
+                                            await apiTask.deleteTask(item.id, val.id).then(() => {
                                               setIsLoading(false);
                                             });
                                           }}

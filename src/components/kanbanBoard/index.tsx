@@ -1,7 +1,9 @@
 import React, { useState, useContext } from "react";
 import items from "../../axios/items";
-import authContext from "../../authContext";
-import { ModalComponent as Modal } from "../../components/modal/taskModal";
+import authContext from "../../context/authContext";
+import { colorTempt } from "../../utils";
+import { ModalComponent as Modal } from "../../components";
+import { useComponentVisible } from "../../utils";
 
 interface Props {
   children: React.ReactNode | React.ReactNode[];
@@ -17,6 +19,8 @@ interface Props {
 const KanbanBoardComponent = (props: Props) => {
   const { colorId, setLoading, taskLength, children, title, description, todoId } = props;
   const { authToken } = useContext(authContext);
+  const { ref, isComponentVisible, setIsComponentVisible } = useComponentVisible(false);
+
   const storageToken = localStorage.getItem("token") as string;
   const token = JSON.parse(storageToken) || authToken;
   const apiItems = items(token);
@@ -26,25 +30,6 @@ const KanbanBoardComponent = (props: Props) => {
     name: "",
     progress_percentage: 0,
   });
-
-  const colorTempt = [
-    {
-      bg: "#f7feff",
-      bd: "#2da7af",
-    },
-    {
-      bg: "#fffcf3",
-      bd: "#feeec7",
-    },
-    {
-      bg: "#fffafa",
-      bd: "#f7bec3",
-    },
-    {
-      bg: "#f8fbf9",
-      bd: "#c4e1d3",
-    },
-  ];
 
   return (
     <div
@@ -63,7 +48,7 @@ const KanbanBoardComponent = (props: Props) => {
         <p
           className="p-3 font-medium"
           style={{
-            color: "#656665",
+            color: colorTempt[colorId].title,
           }}
         >
           {title}
@@ -78,17 +63,18 @@ const KanbanBoardComponent = (props: Props) => {
         </>
       )}
       {children}
-      <div className="flex flex-row items-center hover:cursor-pointer w-max" onClick={() => setShowModal(true)}>
+      <div className="flex flex-row items-center hover:cursor-pointer w-max" onClick={() => setIsComponentVisible(true)}>
         <div className=" bg-white rounded-[50%] border-2 h-[20px] w-[20px] flex justify-center border-blueGray-950 items-center mt-3">
           <p className="mb-0.5">+</p>
         </div>
         <p className="mt-2.5 ml-2.5">New Task</p>
       </div>
-      {showModal ? (
+      {isComponentVisible ? (
         <Modal
+          useRef={ref}
           firstInputValue=""
           secondInputValue={0}
-          onClose={() => setShowModal(false)}
+          onClose={() => setIsComponentVisible(false)}
           title="Task Name"
           onChangeFirstInput={(value) =>
             setBody({
@@ -108,11 +94,11 @@ const KanbanBoardComponent = (props: Props) => {
               .postTask(todoId, body.name, body.progress_percentage)
               .then(() => {
                 setLoading(false);
-                setShowModal(false);
+                setIsComponentVisible(false);
               })
               .catch(() => {
                 setLoading(false);
-                setShowModal(true);
+                setIsComponentVisible(true);
               });
           }}
           useDescription={false}

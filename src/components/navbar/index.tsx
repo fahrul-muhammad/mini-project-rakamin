@@ -1,9 +1,9 @@
-import React, { useState, useContext } from "react";
-import { IoMdClose } from "react-icons/io";
+import { useState, useContext } from "react";
 import { IoMdAdd } from "react-icons/io";
-import { postNewTodos } from "../../axios/todos/postNewTodo";
-import authContext from "../../authContext";
+import todos from "../../axios/todos";
+import authContext from "../../context/authContext";
 import { ModalComponent as Modal } from "../modal/taskModal";
+import { useComponentVisible } from "../../utils";
 
 interface Props {
   setLoading: (status: boolean) => void;
@@ -11,26 +11,30 @@ interface Props {
 }
 
 const NavbarComponent = ({ setLoading, getNewBoard }: Props) => {
-  const { authToken } = useContext(authContext);
-  const storageToken = localStorage.getItem("token") as string;
-  const tokenss = JSON.parse(storageToken) || authToken;
-
   const [showModal, setShowModal] = useState<boolean>(false);
   const [body, setBody] = useState({
     title: "",
     description: "",
   });
+
+  const { authToken } = useContext(authContext);
+  const storageToken = localStorage.getItem("token") as string;
+  const token = JSON.parse(storageToken) || authToken;
+  const apiTodos = todos(token);
+  const { ref, isComponentVisible, setIsComponentVisible } = useComponentVisible(false);
+
   return (
     <>
       <nav className="flex container flex-row h-[8vh] items-center w-[100%] ">
         <p className="pl-10 font-extrabold brand sm:text-sm base:text-base lg:text-xl">Product Roadmap</p>
-        <button onClick={() => setShowModal(true)} className="ml-5 flex flex-row items-center bg-turquoise h-[50px] p-2 rounded-md justify-center">
+        <button onClick={() => setIsComponentVisible(true)} className="ml-5 flex flex-row items-center bg-turquoise h-[50px] p-2 rounded-md justify-center">
           <IoMdAdd className="text-lg font-bold text-white" />
           <p className="ml-2 text-white">Add New Group</p>
         </button>
       </nav>
-      {showModal ? (
+      {isComponentVisible ? (
         <Modal
+          useRef={ref}
           firstInputValue=""
           secondInputValue=""
           onChangeFirstInput={(value) =>
@@ -45,23 +49,24 @@ const NavbarComponent = ({ setLoading, getNewBoard }: Props) => {
               description: value,
             })
           }
-          onClose={() => setShowModal(false)}
+          onClose={() => setIsComponentVisible(false)}
           title="Add New Group"
           useApi={async () => {
             setLoading(true);
-            setShowModal(false);
+            setIsComponentVisible(false);
 
-            await postNewTodos(body, tokenss)
+            await apiTodos
+              .postNewTodos(body)
               .then(() => {
                 setLoading(false);
                 getNewBoard();
-                setShowModal(false);
+                setIsComponentVisible(false);
               })
               .catch(() => {
-                setShowModal(true);
+                setIsComponentVisible(true);
                 setLoading(false);
               });
-            setShowModal(false);
+            setIsComponentVisible(false);
           }}
           useDescription={true}
         />

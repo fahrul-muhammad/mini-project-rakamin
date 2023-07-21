@@ -1,6 +1,5 @@
-import React, { Children } from "react";
+import React from "react";
 import NavbarComponent from "../navbar";
-import KanbanBoard from "../kanbanBoard";
 
 interface Props {
   children: React.ReactNode | React.ReactNode[];

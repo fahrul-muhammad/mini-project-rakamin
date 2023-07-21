@@ -1,11 +1,12 @@
 import { useState, useContext } from "react";
-import { FaArrowRight, FaArrowLeft, FaEdit, FaTrash } from "react-icons/fa";
+import { FaArrowRight, FaArrowLeft, FaTrash } from "react-icons/fa";
 import { BiEditAlt } from "react-icons/bi";
 import items from "../../axios/items";
 import { AiFillCheckCircle } from "react-icons/ai";
-import authContext from "../../authContext";
-import { ModalComponent as Modal } from "../modal/taskModal";
-import { DeleteModalComponent as ModalDelete } from "../modal/deleteModal";
+import authContext from "../../context/authContext";
+
+import { ModalComponent as Modal, DeleteModalComponent as ModalDelete } from "../../components";
+import { handleStyleHover, useComponentVisible } from "../../utils";
 
 interface Props {
   title: string;
@@ -29,7 +30,7 @@ interface Props {
 
 const TaskCard = (props: Props) => {
   const { length, taskIdx, isFirstIndex, isLastIndex, boardIndex, style, title, progress_percentage, onDelete, onMoveRight, todoId, name, progress, taskId, setLoading, onMoveLeft } = props;
-
+  const { ref, isComponentVisible, setIsComponentVisible } = useComponentVisible(false);
   const { authToken } = useContext(authContext);
   const storageToken = localStorage.getItem("token") as string;
   const token = JSON.parse(storageToken) || authToken;
@@ -44,13 +45,6 @@ const TaskCard = (props: Props) => {
     name: name,
     progress_percentage: progress,
   });
-
-  const handleStyleHover = (btnHover: boolean) => {
-    return {
-      color: btnHover ? "#4DB5BC" : "#333333",
-      transition: "color 0.2s ease",
-    };
-  };
 
   const [editBtnHover, setEditBtnHover] = useState(false);
   const [moveLeftBtnHover, setMoveLeftBtnHover] = useState(false);
@@ -136,7 +130,7 @@ const TaskCard = (props: Props) => {
                       </p>
                     </button>
                   )}
-                  <button onMouseEnter={() => setEditBtnHover(true)} onMouseLeave={() => setEditBtnHover(false)} className="flex flex-row items-center w-full " onClick={() => setShowModal(true)}>
+                  <button onMouseEnter={() => setEditBtnHover(true)} onMouseLeave={() => setEditBtnHover(false)} className="flex flex-row items-center w-full " onClick={() => setIsComponentVisible(true)}>
                     <BiEditAlt className="text-base text-gray-800" style={handleStyleHover(editBtnHover)} />
                     <p style={handleStyleHover(editBtnHover)} className="block px-2 py-2 text-sm text-gray-800 rounded-lg hover:text-gray-1000" role="menuitem">
                       Edit
@@ -154,9 +148,10 @@ const TaskCard = (props: Props) => {
           </div>
         </div>
       </div>
-      {showModal ? (
+      {isComponentVisible ? (
         <Modal
-          onClose={() => setShowModal(false)}
+          useRef={ref}
+          onClose={() => setIsComponentVisible(false)}
           useApi={async () => {
             setLoading(true);
             await apiItems
@@ -167,7 +162,7 @@ const TaskCard = (props: Props) => {
               .catch(() => {
                 setLoading(false);
               });
-            setShowModal(false);
+            setIsComponentVisible(false);
           }}
           title="Edit Task"
           onChangeFirstInput={(value) =>

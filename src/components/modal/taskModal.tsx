@@ -9,16 +9,17 @@ interface Props {
   onChangeSecondInput: (event: any) => void;
   firstInputValue: string;
   secondInputValue: string | number;
+  useRef: any;
 }
 
 export const ModalComponent = (props: Props) => {
-  const { useApi, title, useDescription, onClose, onChangeFirstInput, onChangeSecondInput, firstInputValue, secondInputValue } = props;
+  const { useRef, useApi, title, useDescription, onClose, onChangeFirstInput, onChangeSecondInput, firstInputValue, secondInputValue } = props;
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center overflow-x-hidden overflow-y-auto outline-none focus:outline-none">
+      <div className="fixed inset-0 z-50 flex items-center justify-center overflow-x-hidden overflow-y-auto outline-none modal-container focus:outline-none">
         <div className="relative w-auto max-w-3xl mx-auto my-6">
-          <div className="relative w-[42vh] flex flex-col bg-white border-0 rounded-lg shadow-lg outline-none focus:outline-none">
+          <div ref={useRef} className="relative w-[42vh] flex flex-col bg-white border-0 rounded-lg shadow-lg outline-none focus:outline-none">
             <div className="flex items-center justify-center px-6 py-4 border-solid rounded-t border-slate-200">
               <div className="flex flex-row items-center justify-between w-full">
                 <h3 className="text-lg text-3xl font-semibold">{title}</h3>
@@ -106,7 +107,7 @@ export const ModalComponent = (props: Props) => {
           </div>
         </div>
       </div>
-      <div className="fixed inset-0 z-40 bg-black opacity-50" onClick={() => onClose()}></div>
+      <div className="fixed inset-0 z-40 bg-black opacity-50 modal-shadow" onClick={(e) => console.log("EVENT", e.currentTarget.classList.contains("modal-shadow"))}></div>
     </>
   );
 };
