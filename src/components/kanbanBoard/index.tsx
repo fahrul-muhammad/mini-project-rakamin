@@ -24,8 +24,6 @@ const KanbanBoardComponent = (props: Props) => {
   const storageToken = localStorage.getItem("token") as string;
   const token = JSON.parse(storageToken) || authToken;
   const apiItems = items(token);
-
-  const [showModal, setShowModal] = useState<boolean>(false);
   const [body, setBody] = useState({
     name: "",
     progress_percentage: 0,

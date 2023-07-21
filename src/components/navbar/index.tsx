@@ -11,7 +11,6 @@ interface Props {
 }
 
 const NavbarComponent = ({ setLoading, getNewBoard }: Props) => {
-  const [showModal, setShowModal] = useState<boolean>(false);
   const [body, setBody] = useState({
     title: "",
     description: "",
