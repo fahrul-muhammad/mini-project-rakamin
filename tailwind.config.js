@@ -6,10 +6,10 @@ module.exports = {
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     screens: {
-      mobile: "425px",
-      tablet: "768px",
-      pc: "2560px",
-      laptop: "1440px",
+      pc: { min: "2560px", max: "4000px" },
+      laptop: { min: "769px", max: "2599px" },
+      tablet: { min: "677px", max: "768px" },
+      mobile: { min: "375px", max: "676px" },
       ...defaultTheme.screens,
     },
     colors: {
@@ -19,6 +19,7 @@ module.exports = {
       grey: "#ededed",
       softGrey: "#c4c4c4",
       neutral: "#fafafa",
+      primary: "#4DB5BC",
       turquoise: "#01959f",
       darkGrey: "#b7b7b7",
       bg1: "#f7feff",

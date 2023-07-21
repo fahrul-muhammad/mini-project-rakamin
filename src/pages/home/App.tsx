@@ -5,6 +5,7 @@ import { getDataTodos } from "../../axios/todos/getTodos";
 import { useNavigate } from "react-router-dom";
 import authContext from "../../authContext";
 import items from "../../axios/items";
+import LoadingIndicator from "../../components/loading";
 
 const reorder = (list: any, startIndex: any, endIndex: any) => {
   const result = Array.from(list);
@@ -27,6 +28,7 @@ const move = (source: any, destination: any, droppableSource: any, droppableDest
 };
 
 const grid = 8;
+
 const getListStyle = (isDraggingOver: any) => ({
   padding: grid,
   minWidth: 250,
@@ -35,17 +37,20 @@ const getListStyle = (isDraggingOver: any) => ({
 function Home() {
   const { authToken } = useContext(authContext);
   const storageToken = localStorage.getItem("token") as string;
-  const tokenss = JSON.parse(storageToken) || authToken;
+  const token = JSON.parse(storageToken) || authToken;
 
   const navigate = useNavigate();
   const [board, setBoard] = useState<any>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const apiItems = items(tokenss);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const apiItems = items(token);
 
   const getData = async () => {
     try {
       const temp: any = [];
-      const todos = await getDataTodos(tokenss);
+      const todos = await getDataTodos(token);
+      if (todos.length <= 0) {
+        return setIsLoading(false);
+      }
       if (Array.isArray(todos) && todos.length) {
         for await (const todo of todos) {
           await apiItems.getTask(todo.id).then((task) => {
@@ -53,30 +58,31 @@ function Home() {
               ...todo,
               task,
             });
+            setIsLoading(false);
           });
         }
         setBoard(temp);
       }
     } catch (error) {
       console.log(error);
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    if (!tokenss) {
+    if (!token) {
       return navigate("/login");
     }
   }, []);
 
   useEffect(() => {
-    if (!isLoading && tokenss) {
+    if (isLoading && token) {
       getData();
     }
   }, [isLoading]);
 
   function onDragEnd(result: any) {
     const { source, destination, draggableId } = result;
-    // dropped outside the list
     if (!destination) {
       return;
     }
@@ -172,20 +178,22 @@ function Home() {
       setLoading={(value) => {
         setIsLoading(value);
       }}
+      getNewBoard={getData}
     >
       <DragDropContext
         onDragEnd={(e) => {
           onDragEnd(e);
         }}
       >
-        {board.length <= 0 ? (
+        {board.length <= 0 && !isLoading ? (
           <div className="flex items-center justify-center w-full ">
             <p>No Group Task</p>
           </div>
         ) : (
-          <div className="flex w-screen pc:flex-row laptop:flex-row tablet:flex-row mobile:flex-col">
-            {/* LOOPING BOARD DATA */}
-            {isLoading ? null : (
+          <div className="flex w-screen pc:flex-row laptop:flex-row tablet:flex-row mobile:flex-col tablet:flex-wrap pc:justify-normal tablet:justify-between laptop:justify-normal mobile:justify-center">
+            {isLoading ? (
+              <LoadingIndicator />
+            ) : (
               <>
                 {board.map((val: any, ind: number) => {
                   return (
@@ -193,20 +201,17 @@ function Home() {
                       {(provided, snapshot) => (
                         <div ref={provided.innerRef} {...provided.droppableProps}>
                           <KanbanCard
-                            ref={null}
                             colorId={ind}
                             taskLength={val.task.length}
                             todoId={val.id}
                             style={getListStyle(snapshot.isDraggingOver)}
                             {...provided.droppableProps}
-                            onPress={() => {}}
                             setLoading={(status: boolean) => {
                               setIsLoading(status);
                             }}
                             title={val?.title}
                             description={val?.description}
                           >
-                            {/* LOOPING TASK IN EVERY BOARD */}
                             {val?.task?.lengt <= 0
                               ? null
                               : val?.task?.map((item: any, index: any) => (

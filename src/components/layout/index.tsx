@@ -5,15 +5,14 @@ import KanbanBoard from "../kanbanBoard";
 interface Props {
   children: React.ReactNode | React.ReactNode[];
   setLoading: (value: boolean) => void;
+  getNewBoard: () => void;
 }
 
-const LayoutComponent = ({ children, setLoading }: Props) => {
+const LayoutComponent = ({ children, setLoading, getNewBoard }: Props) => {
   return (
     <>
-      <NavbarComponent setLoading={setLoading} />
-      <div>
-        <div className="flex w-[100vw] flex-row min-h-[90vh] py-[1.5rem] border-t-2 mobile:px-1 px-[2.5rem] ">{children}</div>
-      </div>
+      <NavbarComponent getNewBoard={getNewBoard} setLoading={setLoading} />
+      <div className="flex w-[100vw] flex-row min-h-[10vh] py-[1.5rem] border-t-2 mobile:px-1 px-[2.5rem]  ">{children}</div>
     </>
   );
 };

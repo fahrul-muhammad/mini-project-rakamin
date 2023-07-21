@@ -3,6 +3,7 @@ import Logo from "../../assets/logo.png";
 import { Register } from "../../axios/user/signup";
 import { useNavigate } from "react-router-dom";
 import authContext from "../../authContext";
+import LoadingIndicator from "../../components/loading";
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -15,12 +16,16 @@ const SignUp = () => {
   const [isError, setIsError] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string>("");
   const [successMsg, setSuccessMsg] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const { setAuthToken, setAuthenticated } = useContext(authContext);
 
   const handleRegister = async () => {
+    setIsLoading(true);
     const result: any = await Register(body);
     if (result.status === 201) {
+      setIsLoading(false);
+
       const token = JSON.stringify(result.data.auth_token);
       localStorage.setItem("token", token);
       setAuthToken(token);
@@ -31,6 +36,8 @@ const SignUp = () => {
         return navigate("/home");
       }, 1500);
     } else {
+      setIsLoading(false);
+
       setErrorMsg("Register Error, Coba lagi");
       return setIsError(true);
     }
@@ -38,7 +45,8 @@ const SignUp = () => {
 
   return (
     <div className="flex items-center justify-center w-full h-screen">
-      <div className="flex items-center justify-center p-4 flex-col border-2  h-[65vh] rounded-md w-[35vw] border-gray-300">
+      {isLoading && <LoadingIndicator />}
+      <div className="flex items-center justify-center p-4 flex-col border-2  h-[65vh] rounded-md w-[35vw] border-gray-300 pc:w-[35vw] laptop:w-[35vw] mobile:w-[100vw] mobile:border-none tablet:w-[60vw]">
         <img src={Logo} alt="Logo" className="w-[210px] h-[100px] relative" />
         <div className="w-[90%] mb-3">
           <p>
@@ -46,7 +54,7 @@ const SignUp = () => {
           </p>
           <input
             type="Nama"
-            className="relative w-full px-3 py-3 mt-1 text-sm placeholder-gray-400 bg-white border border-gray-500 rounded outline-none text-slate-800 placeholder:text-slate-600 focus:outline-none focus:ring"
+            className="relative w-full px-3 py-3 mt-1 text-sm placeholder-gray-400 bg-white  border-[#E0E0E0] focus:border-primary border-2 rounded outline-none text-slate-800 placeholder:text-slate-600 focus:outline-none "
             placeholder="Nama"
             onChange={(e) => {
               setBody({
@@ -62,7 +70,7 @@ const SignUp = () => {
           </p>
           <input
             type="email"
-            className="relative w-full px-3 py-3 mt-1 text-sm placeholder-gray-400 bg-white border border-gray-500 rounded outline-none text-slate-800 placeholder:text-slate-600 focus:outline-none focus:ring"
+            className={`relative  w-full px-3 py-3 mt-1 text-sm placeholder-gray-400 bg-white   rounded outline-none text-slate-800 placeholder:text-slate-600 focus:outline-none  border-[#E0E0E0] focus:border-primary border-2`}
             placeholder="Email"
             onChange={(e) => {
               setBody({
@@ -78,7 +86,7 @@ const SignUp = () => {
           </p>
           <input
             type="Password"
-            className="relative w-full px-3 py-3 mt-1 text-sm placeholder-gray-400 bg-white border border-gray-500 rounded outline-none text-slate-800 placeholder:text-slate-600 focus:outline-none focus:ring"
+            className="relative w-full px-3 py-3 mt-1 text-sm placeholder-gray-400 bg-white   rounded outline-none text-slate-800 placeholder:text-slate-600 focus:outline-none  border-[#E0E0E0] focus:border-primary border-2"
             placeholder="Password"
             onChange={(e) => {
               setBody({
@@ -94,7 +102,7 @@ const SignUp = () => {
           </p>
           <input
             type="password"
-            className="relative w-full px-3 py-3 mt-1 text-sm placeholder-gray-400 bg-white border border-gray-500 rounded outline-none text-slate-800 placeholder:text-slate-600 focus:outline-none focus:ring"
+            className="relative w-full px-3 py-3 mt-1 text-sm placeholder-gray-400 bg-white   rounded outline-none text-slate-800 placeholder:text-slate-600 focus:outline-none  border-[#E0E0E0] focus:border-primary border-2"
             placeholder="Confirm Password"
             onChange={(e) => {
               setBody({
@@ -109,7 +117,12 @@ const SignUp = () => {
         <button onClick={handleRegister} className="flex mt-5 items-center justify-center w-[90%] h-[5vh] rounded-md bg-turquoise focus:bg-teal-700">
           <p className="font-semibold text-white">Daftar</p>
         </button>
-        <button className="mt-[20px]">
+        <button
+          className="mt-[20px]"
+          onClick={() => {
+            navigate("/login");
+          }}
+        >
           <p>
             Sudah punya akun? <span className="text-turquoise">Masuk disini</span>
           </p>
