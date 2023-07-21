@@ -36,9 +36,7 @@ const TaskCard = (props: Props) => {
   const token = JSON.parse(storageToken) || authToken;
   const apiItems = items(token);
   const barWidth = progress_percentage >= 100 ? "100%" : `${progress_percentage}%`;
-
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(true);
-  const [showModal, setShowModal] = useState<boolean>(false);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [body, setBody] = useState({
     target_todo_id: todoId,
